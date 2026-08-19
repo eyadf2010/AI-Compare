@@ -1,6 +1,6 @@
 import sqlite3
 import re
-from rapidfuzz import fuzz
+
 
 def normalize_words(text):
     text = text.lower()
@@ -59,69 +59,30 @@ def get_snapitee_product(product_name):
 
     return best_match
 
+
 def get_database_info(product_names):
-    database_info = []
+        database_info = []
 
-    for product_name in product_names:
-        product = get_snapitee_product(product_name)
+        for product_name in product_names:
+            product = get_snapitee_product(product_name)
 
-        if product:
-            database_info.append({
-                "product_name": product_name,
-                "snapitee_price": product["price"],
-                "available": product["available"]
-            })
-        else:
-            database_info.append({
-                "product_name": product_name,
-                "snapitee_price": None,
-                "available": None
-            })
+            if product:
+                database_info.append({
+                    "product_name": product_name,
+                    "snapitee_price": product["price"],
+                    "available": product["available"],
+                    "found_in_database": True
+                })
+            else:
+                database_info.append({
+                    "product_name": product_name,
+                    "snapitee_price": None,
+                    "available": None,
+                    "found_in_database": False
+                })
 
-    return database_info
+        return database_info
 
-def get_matching_products(product_names):
-    database_info = []
-
-    for product_name in product_names:
-        product = get_snapitee_product(product_name)
-
-        if product:
-            database_info.append({
-                "product_name": product_name,
-                "snapitee_price": product["price"],
-                "available": product["available"]
-            })
-
-    return database_info
-
-def find_products_in_text(user_input):
-    text = user_input.strip()
-
-    # Remove common comparison/recommendation phrases.
-    text = re.sub(
-        r"(?i)\b(compare|comparing|which is better|which should i buy|"
-        r"should i buy|which one should i get|which one is better|"
-        r"what should i buy|i want to compare)\b",
-        "",
-        text
-    )
-
-    # Split common comparison connectors.
-    parts = re.split(
-        r"(?i)\s+(?:vs\.?|versus|and|or)\s+",
-        text
-    )
-
-    products = []
-
-    for part in parts:
-        part = part.strip(" .,?!:")
-        part = re.sub(r"(?i)^the\s+", "", part)
-        if part:
-            products.append(part)
-
-    return products
 
 if __name__ == "__main__":
     connection = sqlite3.connect("products.db")
